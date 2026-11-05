@@ -353,6 +353,7 @@ class MainActivity : FragmentActivity() {
                                 enable_thinking = enableThinking,
                             )
                         }
+                    Log.i(TAG, "Loading LLM: runtime=" + pluginId + " compute=" + resolvedDeviceId + " nCtx=" + conf.nCtx + " nGpuLayers=" + conf.nGpuLayers + " chipset=" + Build.SOC_MODEL)
                     LlmWrapper
                         .builder()
                         .llmCreateInput(
@@ -370,6 +371,7 @@ class MainActivity : FragmentActivity() {
                             llmWrapper = wrapper
                             onLoadModelSuccess("llm model loaded")
                         }.onFailure { error ->
+                            Log.e(TAG, "Model load failed", error)
                             onLoadModelFailed(error.message.toString())
                         }
                 }
@@ -410,6 +412,7 @@ class MainActivity : FragmentActivity() {
                                 enable_thinking = enableThinking,
                             )
                         }
+                    Log.i(TAG, "Loading VLM: runtime=" + pluginId + " compute=" + resolvedDeviceId + " nCtx=" + config.nCtx + " nGpuLayers=" + config.nGpuLayers + " chipset=" + Build.SOC_MODEL)
                     VlmWrapper
                         .builder()
                         .vlmCreateInput(
@@ -472,6 +475,21 @@ class MainActivity : FragmentActivity() {
         val willUseAiHub =
             hub == HubSource.AIHUB ||
                 (hub == HubSource.AUTO && isAiHubName)
+        val expectedChipset = selectModelData.chipset.orEmpty()
+        val actualChipset = Build.SOC_MODEL.orEmpty()
+        if (willUseAiHub && expectedChipset.isNotBlank() && actualChipset.isNotBlank() &&
+            !actualChipset.contains(expectedChipset, ignoreCase = true) &&
+            !expectedChipset.contains(actualChipset, ignoreCase = true)
+        ) {
+            llDownloading.visibility = View.GONE
+            Log.e(TAG, "Incompatible AI Hub model: expected chipset=$expectedChipset, device chipset=$actualChipset")
+            Toast.makeText(
+                this@MainActivity,
+                "This AI Hub model targets $expectedChipset; this phone reports $actualChipset.",
+                Toast.LENGTH_LONG,
+            ).show()
+            return
+        }
         if (willUseAiHub && selectModelData.chipset.isNullOrBlank()) {
             llDownloading.visibility = View.GONE
             Toast.makeText(this@MainActivity, "AI Hub models require a chipset. Update model_list.json.", Toast.LENGTH_SHORT).show()
@@ -885,7 +903,7 @@ class MainActivity : FragmentActivity() {
                             }
                             ggufLlmDeviceId = ComputeUnitValue.GPU.value
                         } else if (checkedId == R.id.rb_npu) {
-                            nGpuLayers = 999
+                            nGpuLayers = -1
                             ggufLlmDeviceId = ComputeUnitValue.NPU.value
                         } else if (checkedId == R.id.rb_cpu) {
                             ggufLlmDeviceId = ComputeUnitValue.CPU.value
