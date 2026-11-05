@@ -42,7 +42,8 @@ fi
 # Derive unique image/container names from the app directory so two copies of
 # the same app in different directories never collide.
 HASH="$(printf '%s' "$APP_DIR" | sha1sum | cut -c1-12)"
-IMAGE_TAG="aiha-build-$(basename "$APP_DIR")-$HASH"
+APP_NAME="$(basename "$APP_DIR" | tr '[:upper:]' '[:lower:]')"
+IMAGE_TAG="aiha-build-$APP_NAME-$HASH"
 CONTAINER_NAME="$IMAGE_TAG-container"
 
 # The Android toolchain lives in a prebuilt base image, so this build is just a
