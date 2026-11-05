@@ -13,12 +13,17 @@ jobs:
   build:
     name: Build GenieX Chat APK
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build debug APK with Qualcomm toolchain
+      - name: Build Qualcomm Android toolchain image locally
+        run: docker build -f base.Dockerfile -t local/qai-hub-apps-android-base .
+
+      - name: Build debug APK
+        env:
+          QAIHA_BASE_IMAGE: local/qai-hub-apps-android-base
         run: |
           chmod +x build.sh
           ./build.sh
