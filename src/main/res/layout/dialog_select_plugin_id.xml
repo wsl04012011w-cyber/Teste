@@ -56,7 +56,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="nGpuLayers 1~999 : " />
+            android:text="nGpuLayers (-1 = all) : " />
 
         <EditText
             android:id="@+id/et_gpu_layers"
@@ -64,8 +64,8 @@
             android:layout_height="wrap_content"
             android:gravity="right"
             android:inputType="number"
-            android:maxLength="3"
-            android:text="999" />
+            android:maxLength="4"
+            android:text="-1" />
     </LinearLayout>
 
 </LinearLayout>
